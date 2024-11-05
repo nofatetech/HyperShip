@@ -1,0 +1,24 @@
+# Ignore Rails temporary files and logs
+backends/rails_backend/log/*
+backends/rails_backend/tmp/*
+backends/rails_backend/vendor/bundle
+backends/rails_backend/.byebug_history
+
+# Ignore Hyper engine files
+hyper_frontends/*/export/*
+hyper_frontends/*/import/*
+hyper_frontends/*/.import/
+hyper_frontends/*/.hyper/
+hyper_frontends/*/temp/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+
+# Ignore environment files
+.env
+.env.local
