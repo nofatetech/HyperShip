@@ -1,7 +1,12 @@
 class TasksController < ApplicationController
+  protect_from_forgery with: :exception, unless: -> { request.format.json? }
+
+  # GET /tasks
   def index
     @tasks = Task.all
+    render json: @tasks
   end
+
 
   def show
     @task = Task.find(params[:id])
@@ -11,12 +16,15 @@ class TasksController < ApplicationController
     @task = Task.new
   end
 
+  # POST /tasks
   def create
     @task = Task.new(task_params)
     if @task.save
-      redirect_to tasks_path, notice: "Task was successfully created."
+      render json: @task, status: :created
+      # redirect_to tasks_path, notice: "Task was successfully created."
     else
-      render :new
+      render json: @task.errors, status: :unprocessable_entity
+      # render :new
     end
   end
 

@@ -1,0 +1,9 @@
+
+
+POST http://127.0.0.1:3000/tasks HTTP/1.1
+content-type: application/json
+Accept: application/json
+
+{
+    "task": {"content":"1"}
+}
