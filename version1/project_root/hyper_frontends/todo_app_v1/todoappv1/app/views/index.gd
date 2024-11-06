@@ -5,7 +5,7 @@ extends Control
 @onready var task_list = %VBoxContainer
 
 # Assuming task.tscn is in the path `res://app/views/task.tscn`
-var TaskScene = preload("res://app/views/task.tscn")
+var TaskScene = preload("res://app/views/task_view.tscn")
 
 func _ready():
 	# Ensure `tasks_controller` is in the scene tree for HTTP requests

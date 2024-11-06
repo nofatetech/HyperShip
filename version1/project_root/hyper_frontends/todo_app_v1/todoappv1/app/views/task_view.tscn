@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ntu2ckc3ysbh"]
 
-[ext_resource type="Script" path="res://app/views/task.gd" id="1_y1ram"]
+[ext_resource type="Script" path="res://app/views/task_view.gd" id="1_f8e5c"]
 
 [node name="Task" type="Control" node_paths=PackedStringArray("content_label", "id_label")]
 layout_mode = 3
@@ -9,7 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_y1ram")
+script = ExtResource("1_f8e5c")
 content_label = NodePath("HBoxContainer/ContentLabel")
 id_label = NodePath("HBoxContainer/IDLabel")
 
