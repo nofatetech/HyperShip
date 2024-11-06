@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dygbwl0sxkno"]
+
+[ext_resource type="Script" path="res://app/views/index.gd" id="1_ipg80"]
+
+[node name="Index" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_ipg80")

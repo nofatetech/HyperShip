@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://dygbwl0sxkno"]
+
+[ext_resource type="Script" path="res://app/views/index.gd" id="1_ipg80"]
+
+[node name="Index" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_ipg80")
+
+[node name="Controllers" type="Node" parent="."]
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 0
+offset_right = 455.0
+offset_bottom = 43.0
+
+[node name="CreateButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 54.0
+offset_right = 88.0
+offset_bottom = 89.0
+text = "save"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 111.0
+offset_right = 882.0
+offset_bottom = 602.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 111
+
+[connection signal="button_up" from="CreateButton" to="." method="_on_create_button_button_up"]
