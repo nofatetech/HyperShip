@@ -20,6 +20,7 @@ class TasksController < ApplicationController
   def create
     @task = Task.new(task_params)
     if @task.save
+      ActionCable.server.broadcast("tasks_channel", { task: @task })
       render json: @task, status: :created
       # redirect_to tasks_path, notice: "Task was successfully created."
     else
