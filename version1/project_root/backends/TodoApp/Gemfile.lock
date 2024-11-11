@@ -133,6 +133,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.1)
     msgpack (1.7.3)
+    mysql2 (0.5.6)
     net-imap (0.5.1)
       date
       net-protocol
@@ -254,15 +255,11 @@ GEM
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
     sqlite3 (2.2.0-aarch64-linux-gnu)
-    sqlite3 (2.2.0-aarch64-linux-musl)
     sqlite3 (2.2.0-arm-linux-gnu)
-    sqlite3 (2.2.0-arm-linux-musl)
     sqlite3 (2.2.0-arm64-darwin)
     sqlite3 (2.2.0-x86-linux-gnu)
-    sqlite3 (2.2.0-x86-linux-musl)
     sqlite3 (2.2.0-x86_64-darwin)
     sqlite3 (2.2.0-x86_64-linux-gnu)
-    sqlite3 (2.2.0-x86_64-linux-musl)
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.1.2)
@@ -290,19 +287,11 @@ GEM
 
 PLATFORMS
   aarch64-linux
-  aarch64-linux-gnu
-  aarch64-linux-musl
   arm-linux
-  arm-linux-gnu
-  arm-linux-musl
   arm64-darwin
   x86-linux
-  x86-linux-gnu
-  x86-linux-musl
   x86_64-darwin
   x86_64-linux
-  x86_64-linux-gnu
-  x86_64-linux-musl
 
 DEPENDENCIES
   bootsnap
@@ -311,6 +300,7 @@ DEPENDENCIES
   debug
   importmap-rails
   jbuilder
+  mysql2 (>= 0.5)
   puma (>= 5.0)
   rails (~> 7.2.1, >= 7.2.1.2)
   rubocop-rails-omakase
@@ -323,4 +313,4 @@ DEPENDENCIES
   web-console
 
 BUNDLED WITH
-   2.5.22
+   2.5.23
