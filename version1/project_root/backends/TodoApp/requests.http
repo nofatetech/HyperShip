@@ -7,3 +7,50 @@ Accept: application/json
 {
     "task": {"content":"1"}
 }
+
+###
+
+
+POST http://127.0.0.1:3000/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "testuser1@example.com",
+  "password": "password123"
+}
+
+
+###
+
+
+GET http://127.0.0.1:3000/verify_token
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJqdGkiOiIxZDhmZTBlZC04YTdjLTQ1MDQtODA2ZC0wNzc0MTU2MDM3OWQiLCJleHAiOjE3MzE0NDU3MDd9.FzhMPttUvLNmDGrFt7ha27jC1cVcfJ1s0pwKr5hKCbQ
+
+
+
+###
+
+
+
+DELETE http://127.0.0.1:3000/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJqdGkiOiIxZDhmZTBlZC04YTdjLTQ1MDQtODA2ZC0wNzc0MTU2MDM3OWQiLCJleHAiOjE3MzE0NDU3MDd9.FzhMPttUvLNmDGrFt7ha27jC1cVcfJ1s0pwKr5hKCbQ
+
+
+###
+
+
+
+
+POST http://127.0.0.1:3000/refresh_token
+Content-Type: application/json
+
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJqdGkiOiIxZDhmZTBlZC04YTdjLTQ1MDQtODA2ZC0wNzc0MTU2MDM3OWQiLCJleHAiOjE3MzE0NDU3MDd9.FzhMPttUvLNmDGrFt7ha27jC1cVcfJ1s0pwKr5hKCbQ"
+}
+
+
+
+###
+
+
