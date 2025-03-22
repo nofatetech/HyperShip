@@ -9,6 +9,7 @@ hyper_frontends/*/export/*
 hyper_frontends/*/import/*
 hyper_frontends/*/.import/
 hyper_frontends/*/.hyper/
+hyper_frontends/*/.godot/
 hyper_frontends/*/temp/
 
 # Ignore OS-specific files

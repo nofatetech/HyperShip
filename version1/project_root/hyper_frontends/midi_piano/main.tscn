@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cm6vmwtmkv6uj"]
+
+[ext_resource type="PackedScene" uid="uid://dctcehelc4sv0" path="res://piano.tscn" id="1_05tq8"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Piano" parent="." instance=ExtResource("1_05tq8")]
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
