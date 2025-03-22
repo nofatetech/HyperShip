@@ -4,6 +4,8 @@ backends/rails_backend/tmp/*
 backends/rails_backend/vendor/bundle
 backends/rails_backend/.byebug_history
 
+temp_export/
+
 # Ignore Hyper engine files
 hyper_frontends/*/export/*
 hyper_frontends/*/import/*
