@@ -5,6 +5,8 @@ signal scored
 var xtype = 1
 var xtype2 = 0
 
+var hasportal = false
+
 #var ARTOPTIONS = [
 	##{"slug": "sherlock1", "file": "res://assets/new2/sherlock-4bf2e2f1-15a5-488f-bba9-ec2a34474785.webp"},
 	##{"slug": "sherlock1", "file": "https://image.lexica.art/full_webp/30b56090-b8b4-4c7e-accc-59b843e91cb3"},
@@ -36,6 +38,18 @@ func _enter_tree():
 	$Type2.visible = false
 	$Type3.visible = false
 
+	var probability_portal = randi_range(1, 10)
+	if probability_portal == 1:
+		print("!!!!!!!!!!!!!!!!!!!!!!")
+		xtype = 1
+		hasportal = true
+		$PORTALArea2D.visible = true
+		$Lower.visible = false
+		$Upper.visible = false
+		
+	
+
+
 
 	# enemy
 	if xtype == 1:
@@ -56,6 +70,13 @@ func _enter_tree():
 		#$Wall1.modulate = Color("000000", 0.66)
 		$Type2/ArtNode.visible = true
 		$Lower/Zombie1.modulate = Color("ffffff", 0)
+		
+
+		$Type2/ArtNode/Artimg3.texture = load("res://assets/new2/files/willie1.png")
+		$Type2/ArtNode/Artimg3.modulate = Color("ffffff")
+		$Type2/ArtNode/ArtLabel.text = ""
+		return
+
 		#$Type3/Artimg1.texture = load("res://assets/1830d263-2743-4ca1-b8db-00ad58816081.webp")
 		#$Type2/ArtNode/Artimg3.texture = load("res://assets/new2/kingkong1-be2ce4a2-709f-4b83-9660-2980efb9dbd4.webp")
 		var toptionselected = Xglobal.ARTOPTIONS[ randi_range(0,len(Xglobal.ARTOPTIONS)-1) ]
@@ -152,6 +173,8 @@ func _http_request_completed(result, response_code, headers, body):
 
 
 func _on_body_entered(body):
+	if hasportal:
+		return
 	hit.emit(xtype)
 	if xtype == 1:
 		$Upper.modulate = Color("fc4a03", 0.77)
@@ -163,3 +186,12 @@ func _on_score_area_body_entered(body):
 	if xtype == 2:
 		$Type2/MoneyFountain.visible = false
 		pass
+
+
+func _on_portal_area_2d_body_entered(body: Node2D) -> void:
+	if hasportal:
+		print("PORTAL GO!!!!")
+		OS.shell_open("http://portal.pieter.com")
+		return
+	
+	pass # Replace with function body.

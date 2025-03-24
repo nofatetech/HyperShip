@@ -41,3 +41,19 @@ script = ExtResource("2_lmi58")
 
 [node name="AuthManager" type="Node" parent="HyperShip"]
 script = ExtResource("3_p0iyf")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 206.0
+offset_top = 155.0
+offset_right = 256.0
+offset_bottom = 186.0
+text = "Login"
+
+[node name="TextEdit" type="TextEdit" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 153.0
+offset_right = 192.0
+offset_bottom = 183.0
+placeholder_text = "Token"

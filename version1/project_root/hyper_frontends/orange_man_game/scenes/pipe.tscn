@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://cr3pl7yfk32tb"]
+[gd_scene load_steps=21 format=3 uid="uid://cr3pl7yfk32tb"]
 
 [ext_resource type="Script" path="res://scenes/pipe.gd" id="1_i8p56"]
 [ext_resource type="Texture2D" uid="uid://den4sx3n8oo4t" path="res://assets/pipe.png" id="2_jcmtj"]
@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://cqtvm8gqk061m" path="res://assets/new2/building1.png" id="3_qhbd8"]
 [ext_resource type="Texture2D" uid="uid://ubv4sltcxna8" path="res://assets/new2/zombie-521243_1280 (1).png" id="3_y6osr"]
 [ext_resource type="Texture2D" uid="uid://gkci6sj7s7i0" path="res://assets/new2/genericItem_color_158.png" id="4_iwgfd"]
-[ext_resource type="Texture2D" uid="uid://wn2j40pn7tqq" path="res://assets/new2/files/sherlock.webp" id="5_dldo6"]
 [ext_resource type="FontFile" uid="uid://dauxyy32nopjb" path="res://assets/fonts/BROADW.TTF" id="7_xuql8"]
 [ext_resource type="Texture2D" uid="uid://blomjp8xe4f1l" path="res://assets/new2/genericItem_color_156.png" id="9_6i4bj"]
+[ext_resource type="Texture2D" uid="uid://bpatfv2qk3kbm" path="res://assets/new3/ai-generated-8661814_1280.png" id="11_8eq7m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rnnky"]
 size = Vector2(78, 36)
@@ -25,6 +25,9 @@ size = Vector2(72, 524)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_51tso"]
 size = Vector2(20, 261)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_p4wif"]
+load_path = "res://.godot/imported/sherlock.webp-e442d9be98565a0fe3687bf3af44b903.ctex"
 
 [sub_resource type="Gradient" id="Gradient_xdcax"]
 colors = PackedColorArray(0.54902, 0.760784, 0.513726, 0.486275, 0.360784, 0.537255, 0.329412, 0.372549)
@@ -42,6 +45,9 @@ gravity = Vector3(0, 0, 0)
 scale_min = 33.0
 scale_max = 33.0
 color_ramp = SubResource("GradientTexture1D_ia1on")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wdi28"]
+size = Vector2(18.4655, 18.5143)
 
 [node name="Pipe" type="Area2D" groups=["pipes"]]
 script = ExtResource("1_i8p56")
@@ -178,7 +184,7 @@ texture = ExtResource("4_iwgfd")
 modulate = Color(0.25788, 0, 0.0558029, 1)
 position = Vector2(0, 319)
 scale = Vector2(0.0841346, 0.0841346)
-texture = ExtResource("5_dldo6")
+texture = SubResource("CompressedTexture2D_p4wif")
 
 [node name="ArtLabel" type="Label" parent="Type2/ArtNode"]
 offset_left = -132.0
@@ -205,18 +211,33 @@ visibility_rect = Rect2(-100, -400, 210, 420)
 visible = false
 position = Vector2(12, -295)
 scale = Vector2(0.143029, 0.143029)
-texture = ExtResource("5_dldo6")
+texture = SubResource("CompressedTexture2D_p4wif")
 
 [node name="Artimg2" type="Sprite2D" parent="Type3"]
 visible = false
 position = Vector2(12, -295)
 scale = Vector2(0.143029, 0.143029)
-texture = ExtResource("5_dldo6")
+texture = SubResource("CompressedTexture2D_p4wif")
 
 [node name="Ticket" type="Sprite2D" parent="."]
 visible = false
 position = Vector2(75, -1)
 texture = ExtResource("9_6i4bj")
 
+[node name="PORTALArea2D" type="Area2D" parent="."]
+visible = false
+position = Vector2(53, 20)
+scale = Vector2(2.27451, 3.88889)
+
+[node name="PORTAL" type="Sprite2D" parent="PORTALArea2D"]
+position = Vector2(-23.0819, -1.8)
+scale = Vector2(0.0799775, 0.050625)
+texture = ExtResource("11_8eq7m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PORTALArea2D"]
+position = Vector2(-21.9828, 0.771429)
+shape = SubResource("RectangleShape2D_wdi28")
+
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="body_entered" from="ScoreArea" to="." method="_on_score_area_body_entered"]
+[connection signal="body_entered" from="PORTALArea2D" to="." method="_on_portal_area_2d_body_entered"]
