@@ -1,0 +1,222 @@
+[gd_scene load_steps=19 format=3 uid="uid://cr3pl7yfk32tb"]
+
+[ext_resource type="Script" path="res://scenes/pipe.gd" id="1_i8p56"]
+[ext_resource type="Texture2D" uid="uid://den4sx3n8oo4t" path="res://assets/pipe.png" id="2_jcmtj"]
+[ext_resource type="Texture2D" uid="uid://4kd7ytfukxb" path="res://assets/new2/wall1-f598388a-aa3b-46e5-91f1-9f7e70b15a5e.webp" id="3_eshs3"]
+[ext_resource type="Texture2D" uid="uid://drtsp8wq56eww" path="res://assets/new2/voxelTile_30.png" id="3_k4xxl"]
+[ext_resource type="Texture2D" uid="uid://cqtvm8gqk061m" path="res://assets/new2/building1.png" id="3_qhbd8"]
+[ext_resource type="Texture2D" uid="uid://ubv4sltcxna8" path="res://assets/new2/zombie-521243_1280 (1).png" id="3_y6osr"]
+[ext_resource type="Texture2D" uid="uid://gkci6sj7s7i0" path="res://assets/new2/genericItem_color_158.png" id="4_iwgfd"]
+[ext_resource type="Texture2D" uid="uid://wn2j40pn7tqq" path="res://assets/new2/files/sherlock.webp" id="5_dldo6"]
+[ext_resource type="FontFile" uid="uid://dauxyy32nopjb" path="res://assets/fonts/BROADW.TTF" id="7_xuql8"]
+[ext_resource type="Texture2D" uid="uid://blomjp8xe4f1l" path="res://assets/new2/genericItem_color_156.png" id="9_6i4bj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rnnky"]
+size = Vector2(78, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6a0s2"]
+size = Vector2(72, 524)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h5r4x"]
+size = Vector2(78, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0wuvw"]
+size = Vector2(72, 524)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_51tso"]
+size = Vector2(20, 261)
+
+[sub_resource type="Gradient" id="Gradient_xdcax"]
+colors = PackedColorArray(0.54902, 0.760784, 0.513726, 0.486275, 0.360784, 0.537255, 0.329412, 0.372549)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ia1on"]
+gradient = SubResource("Gradient_xdcax")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fqqg3"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 17.514
+initial_velocity_min = 90.0
+initial_velocity_max = 408.92
+gravity = Vector3(0, 0, 0)
+scale_min = 33.0
+scale_max = 33.0
+color_ramp = SubResource("GradientTexture1D_ia1on")
+
+[node name="Pipe" type="Area2D" groups=["pipes"]]
+script = ExtResource("1_i8p56")
+
+[node name="Lower" type="Sprite2D" parent="."]
+position = Vector2(0, 55)
+scale = Vector2(2.60317, 1)
+texture = ExtResource("3_qhbd8")
+offset = Vector2(0, 380)
+
+[node name="Zombie1" type="Sprite2D" parent="Lower"]
+position = Vector2(1.53658, 281)
+scale = Vector2(0.0744285, 0.19375)
+texture = ExtResource("3_y6osr")
+flip_h = true
+
+[node name="Lower2" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_jcmtj")
+offset = Vector2(0, 380)
+
+[node name="Building1" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(0, 393)
+texture = ExtResource("3_qhbd8")
+
+[node name="Wall1" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-2, 381)
+scale = Vector2(0.0492788, 0.241653)
+texture = ExtResource("3_eshs3")
+
+[node name="VoxelTile34" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 394)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="VoxelTile35" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 394)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="VoxelTile32" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 331)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="VoxelTile31" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 272)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="VoxelTile33" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 206)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="VoxelTile30" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-1, 138)
+scale = Vector2(0.702703, 0.702703)
+texture = ExtResource("3_k4xxl")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 173)
+shape = SubResource("RectangleShape2D_rnnky")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="."]
+position = Vector2(0, 453)
+shape = SubResource("RectangleShape2D_6a0s2")
+
+[node name="Upper" type="Sprite2D" parent="."]
+position = Vector2(0, -33.9999)
+scale = Vector2(2.53968, 1)
+texture = ExtResource("3_qhbd8")
+offset = Vector2(0, -380)
+flip_v = true
+
+[node name="Upper2" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_jcmtj")
+offset = Vector2(0, -380)
+flip_v = true
+
+[node name="Building2" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(2, -387)
+texture = ExtResource("3_qhbd8")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="."]
+position = Vector2(0, -152)
+shape = SubResource("RectangleShape2D_h5r4x")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="."]
+position = Vector2(0, -432)
+shape = SubResource("RectangleShape2D_0wuvw")
+
+[node name="ScoreArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ScoreArea"]
+position = Vector2(59, 9.5)
+shape = SubResource("RectangleShape2D_51tso")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -32.0
+offset_top = 290.0
+offset_right = 30.0
+offset_bottom = 358.0
+horizontal_alignment = 1
+
+[node name="GenericItemColor158" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(70, 2)
+texture = ExtResource("4_iwgfd")
+
+[node name="Type1" type="Node2D" parent="."]
+
+[node name="Type2" type="Node2D" parent="."]
+
+[node name="MoneyIcon" type="Sprite2D" parent="Type2"]
+visible = false
+position = Vector2(56, 0)
+scale = Vector2(0.633663, 0.633663)
+texture = ExtResource("4_iwgfd")
+
+[node name="ArtNode" type="Node2D" parent="Type2"]
+
+[node name="Artimg3" type="Sprite2D" parent="Type2/ArtNode"]
+modulate = Color(0.25788, 0, 0.0558029, 1)
+position = Vector2(0, 319)
+scale = Vector2(0.0841346, 0.0841346)
+texture = ExtResource("5_dldo6")
+
+[node name="ArtLabel" type="Label" parent="Type2/ArtNode"]
+offset_left = -132.0
+offset_top = 436.0
+offset_right = 134.0
+offset_bottom = 498.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("7_xuql8")
+theme_override_font_sizes/font_size = 23
+text = "Sherlock Holmes"
+horizontal_alignment = 1
+
+[node name="MoneyFountain" type="GPUParticles2D" parent="Type2"]
+position = Vector2(3.8147e-06, 132)
+scale = Vector2(0.633663, 0.633663)
+amount = 33
+amount_ratio = 0.7
+process_material = SubResource("ParticleProcessMaterial_fqqg3")
+visibility_rect = Rect2(-100, -400, 210, 420)
+
+[node name="Type3" type="Node2D" parent="."]
+
+[node name="Artimg1" type="Sprite2D" parent="Type3"]
+visible = false
+position = Vector2(12, -295)
+scale = Vector2(0.143029, 0.143029)
+texture = ExtResource("5_dldo6")
+
+[node name="Artimg2" type="Sprite2D" parent="Type3"]
+visible = false
+position = Vector2(12, -295)
+scale = Vector2(0.143029, 0.143029)
+texture = ExtResource("5_dldo6")
+
+[node name="Ticket" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(75, -1)
+texture = ExtResource("9_6i4bj")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_entered" from="ScoreArea" to="." method="_on_score_area_body_entered"]

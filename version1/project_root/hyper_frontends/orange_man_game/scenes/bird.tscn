@@ -1,0 +1,271 @@
+[gd_scene load_steps=31 format=3 uid="uid://b6xt1pam4caki"]
+
+[ext_resource type="Script" path="res://scenes/bird.gd" id="1_jmxwj"]
+[ext_resource type="Texture2D" uid="uid://ohsfkjre0vwk" path="res://assets/new2/Flame.png" id="2_j2oah"]
+[ext_resource type="Texture2D" uid="uid://d0i6djasvmuwb" path="res://assets/new2/genericItem_color_083.png" id="2_oywab"]
+[ext_resource type="Texture2D" uid="uid://1rjwwj8n3bn4" path="res://assets/new2/files/willie1.png" id="3_rr38x"]
+[ext_resource type="Texture2D" uid="uid://bv280lmxt1qot" path="res://assets/new2/orangeman1.png" id="4_wijgg"]
+[ext_resource type="FontFile" uid="uid://bfsri56tkbdnj" path="res://assets/new2/fonts/corbelb.ttf" id="6_8wimx"]
+[ext_resource type="Texture2D" uid="uid://gkci6sj7s7i0" path="res://assets/new2/genericItem_color_158.png" id="7_dbgyp"]
+[ext_resource type="AudioStream" uid="uid://dye8hpdkwpkpd" path="res://assets/new2/audio/loser.ogg" id="8_1dfe2"]
+[ext_resource type="Script" path="res://addons/shaker/src/Vector2/shaker_component2D.gd" id="9_fe0gi"]
+
+[sub_resource type="Gradient" id="Gradient_oqbys"]
+offsets = PackedFloat32Array(0.222222, 0.504762)
+colors = PackedColorArray(0.25098, 0.235294, 0.211765, 0.545098, 0.482353, 0.462745, 0.435294, 0.490196)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_lifx5"]
+gradient = SubResource("Gradient_oqbys")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qf3av"]
+particle_flag_disable_z = true
+direction = Vector3(-1, 0, 0)
+initial_velocity_min = 221.62
+initial_velocity_max = 372.97
+gravity = Vector3(0, 98, 0)
+color_ramp = SubResource("GradientTexture1D_lifx5")
+
+[sub_resource type="Gradient" id="Gradient_dq0a7"]
+offsets = PackedFloat32Array(0.101587, 0.504762)
+colors = PackedColorArray(0.225293, 0.488641, 0.301563, 0.545098, 0.213305, 0.355865, 0.205216, 0.490196)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_4l0c6"]
+gradient = SubResource("Gradient_dq0a7")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_203hq"]
+particle_flag_disable_z = true
+direction = Vector3(-1, 0, 0)
+initial_velocity_min = 221.62
+initial_velocity_max = 372.97
+gravity = Vector3(0, 98, 0)
+color_ramp = SubResource("GradientTexture1D_4l0c6")
+
+[sub_resource type="Gradient" id="Gradient_fdg8l"]
+offsets = PackedFloat32Array(0.222222, 0.504762)
+colors = PackedColorArray(0.988235, 0.290196, 0.0117647, 1, 0.839216, 0.623529, 0.0588235, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_la3uo"]
+gradient = SubResource("Gradient_fdg8l")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_51bie"]
+particle_flag_disable_z = true
+direction = Vector3(-1, 0, 0)
+initial_velocity_min = 221.62
+initial_velocity_max = 372.97
+gravity = Vector3(0, 98, 0)
+color_ramp = SubResource("GradientTexture1D_la3uo")
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xn4pq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_rr38x")
+}],
+"loop": true,
+"name": &"flying2",
+"speed": 5.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_ceixl"]
+colors = PackedColorArray(0.54667, 0.478051, 0.126171, 0.882353, 0.772324, 0.127618, 0.245003, 0.882353)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_0vr26"]
+gradient = SubResource("Gradient_ceixl")
+
+[sub_resource type="Curve" id="Curve_jo0fu"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.390857), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_0rsjs"]
+curve = SubResource("Curve_jo0fu")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ra0vg"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+spread = 132.568
+initial_velocity_min = 554.62
+initial_velocity_max = 554.62
+gravity = Vector3(0, 98, 0)
+scale_min = 33.0
+scale_max = 77.0
+scale_curve = SubResource("CurveTexture_0rsjs")
+color_ramp = SubResource("GradientTexture1D_0vr26")
+
+[sub_resource type="Gradient" id="Gradient_nnrqe"]
+colors = PackedColorArray(0.228214, 0.55912, 0.27354, 0.882353, 0.114842, 0.186297, 0.0549666, 0.705882)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_0pmbr"]
+gradient = SubResource("Gradient_nnrqe")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_hv7gb"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+spread = 132.568
+initial_velocity_min = 635.7
+initial_velocity_max = 635.7
+radial_velocity_min = 313.51
+radial_velocity_max = 313.51
+gravity = Vector3(0, 98, 0)
+scale_min = 33.0
+scale_max = 77.0
+scale_curve = SubResource("CurveTexture_0rsjs")
+color_ramp = SubResource("GradientTexture1D_0pmbr")
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0hppq"]
+radius = 18.0
+height = 52.0
+
+[sub_resource type="Animation" id="Animation_ffow0"]
+resource_name = "healthtick"
+loop_mode = 2
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0, 3, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.4, 1)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:scale:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0, 4, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.4, 1)
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_r3p3a"]
+_data = {
+"healthtick": SubResource("Animation_ffow0")
+}
+
+[node name="Bird" type="CharacterBody2D"]
+script = ExtResource("1_jmxwj")
+
+[node name="ParticlesSmoke" type="GPUParticles2D" parent="."]
+visible = false
+position = Vector2(-35, 39)
+sub_emitter = NodePath(".")
+process_material = SubResource("ParticleProcessMaterial_qf3av")
+texture = ExtResource("2_j2oah")
+explosiveness = 0.02
+
+[node name="ParticlesGreen" type="GPUParticles2D" parent="."]
+visible = false
+position = Vector2(-35, 39)
+sub_emitter = NodePath(".")
+process_material = SubResource("ParticleProcessMaterial_203hq")
+texture = ExtResource("2_j2oah")
+explosiveness = 0.02
+
+[node name="ParticlesFire" type="GPUParticles2D" parent="."]
+visible = false
+position = Vector2(-35, 39)
+sub_emitter = NodePath(".")
+process_material = SubResource("ParticleProcessMaterial_51bie")
+texture = ExtResource("2_j2oah")
+explosiveness = 0.02
+
+[node name="Microphone" type="Sprite2D" parent="."]
+position = Vector2(3, 56)
+rotation = 1.09289
+scale = Vector2(0.940155, 0.947542)
+texture = ExtResource("2_oywab")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.234694, 0.234694)
+sprite_frames = SubResource("SpriteFrames_xn4pq")
+animation = &"flying2"
+frame_progress = 0.180127
+
+[node name="Willie" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.101852, 0.101852)
+sprite_frames = SubResource("SpriteFrames_xn4pq")
+animation = &"flying2"
+frame_progress = 0.180127
+
+[node name="Orangeman1" type="Sprite2D" parent="."]
+position = Vector2(1, -3)
+scale = Vector2(0.336735, 0.336735)
+texture = ExtResource("4_wijgg")
+
+[node name="ParticlesHit" type="GPUParticles2D" parent="."]
+emitting = false
+process_material = SubResource("ParticleProcessMaterial_ra0vg")
+lifetime = 0.2
+one_shot = true
+explosiveness = 0.77
+randomness = 0.15
+
+[node name="ParticlesGetMoney" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 17
+process_material = SubResource("ParticleProcessMaterial_hv7gb")
+lifetime = 0.2
+one_shot = true
+explosiveness = 0.77
+randomness = 0.15
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_0hppq")
+
+[node name="HealthAnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../HealthLabel")
+libraries = {
+"": SubResource("AnimationLibrary_r3p3a")
+}
+
+[node name="HealthLabel" type="Label" parent="."]
+offset_left = -60.0
+offset_top = -86.0
+offset_right = 66.0
+offset_bottom = -52.0
+theme_override_fonts/font = ExtResource("6_8wimx")
+theme_override_font_sizes/font_size = 33
+text = "100%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MoneyLabel" type="Label" parent="."]
+visible = false
+offset_left = -14.0
+offset_top = -108.0
+offset_right = 86.0
+offset_bottom = -74.0
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("6_8wimx")
+theme_override_font_sizes/font_size = 33
+text = "0"
+vertical_alignment = 1
+
+[node name="GenericItemColor158" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-44, -92)
+scale = Vector2(0.44802, 0.44802)
+texture = ExtResource("7_dbgyp")
+
+[node name="AudioLoser" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_1dfe2")
+volume_db = -7.761
+pitch_scale = 1.38
+
+[node name="ShakerComponent2D" type="Node2D" parent="." node_paths=PackedStringArray("Targets")]
+script = ExtResource("9_fe0gi")
+custom_target = true
+Targets = [NodePath("..")]
+is_playing = true
+AutoPlay = true
+duration = 3.0
