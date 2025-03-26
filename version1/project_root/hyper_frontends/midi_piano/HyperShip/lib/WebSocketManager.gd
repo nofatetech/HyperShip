@@ -19,6 +19,7 @@ func setup(url: String):
 
 # Initiate a connection to the WebSocket server
 func connect_to_server():
+	print("connect_to_server!")
 	var err = socket.connect_to_url(websocket_url)
 	if err != OK:
 		print("Unable to connect: ", websocket_url)

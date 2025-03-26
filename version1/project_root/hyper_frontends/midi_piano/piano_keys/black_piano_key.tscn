@@ -26,4 +26,47 @@ script = ExtResource("2")
 [node name="ColorTimer" type="Timer" parent="."]
 one_shot = true
 
+[node name="Label2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 117.0
+offset_right = 94.0
+offset_bottom = 150.0
+rotation = -1.5708
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.00184107, 0.00184107, 0.00184107, 1)
+theme_override_font_sizes/font_size = 23
+text = "33,333"
+horizontal_alignment = 2
+
+[node name="Graph1" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 19.0
+offset_top = 219.0
+offset_right = 8.0
+offset_bottom = 77.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+color = Color(0.254128, 0.23239, 0.263438, 1)
+script = ExtResource("2")
+
+[node name="Graph2" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 37.0
+offset_top = 396.0
+offset_right = 26.0
+offset_bottom = 254.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+color = Color(0.816035, 0.362859, 1, 1)
+script = ExtResource("2")
+
 [connection signal="timeout" from="ColorTimer" to="." method="deactivate"]

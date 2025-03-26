@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dctcehelc4sv0"]
+[gd_scene load_steps=5 format=3 uid="uid://dctcehelc4sv0"]
 
 [ext_resource type="Script" path="res://piano.gd" id="1"]
+[ext_resource type="Script" path="res://HyperShip.gd" id="2_05ogx"]
 [ext_resource type="Script" path="res://HyperShip/lib/WebSocketManager.gd" id="2_lmi58"]
 [ext_resource type="Script" path="res://HyperShip/lib/AuthManager.gd" id="3_p0iyf"]
 
@@ -12,11 +13,11 @@ color = Color(0, 0, 0, 1)
 script = ExtResource("1")
 
 [node name="Container" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 172.0
-offset_top = 23.0
-offset_right = 1206.0
-offset_bottom = 100.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 126.0
+grow_horizontal = 2
 
 [node name="WhiteKeys" type="HBoxContainer" parent="Container"]
 layout_mode = 1
@@ -35,6 +36,7 @@ anchor_bottom = 0.6
 mouse_filter = 2
 
 [node name="HyperShip" type="Node2D" parent="."]
+script = ExtResource("2_05ogx")
 
 [node name="WebSocketManager" type="Node" parent="HyperShip"]
 script = ExtResource("2_lmi58")
@@ -44,16 +46,16 @@ script = ExtResource("3_p0iyf")
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 0
-offset_left = 206.0
-offset_top = 155.0
-offset_right = 256.0
-offset_bottom = 186.0
-text = "Login"
+offset_left = 271.0
+offset_top = 146.0
+offset_right = 321.0
+offset_bottom = 177.0
+text = "Play"
 
 [node name="TextEdit" type="TextEdit" parent="."]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 153.0
-offset_right = 192.0
-offset_bottom = 183.0
-placeholder_text = "Token"
+offset_left = 38.0
+offset_top = 142.0
+offset_right = 251.0
+offset_bottom = 172.0
+placeholder_text = "Your Name or Username"
