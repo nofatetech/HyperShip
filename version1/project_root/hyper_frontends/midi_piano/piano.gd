@@ -19,6 +19,7 @@ var websocket_manager: WebSocketManager
 @onready var black_keys = $Container/BlackKeys
 @onready var username_input = $TextEdit
 @onready var play_button = $Button
+@onready var connection_status = $ConnectionStatus
 
 func _ready():
 	# Sanity checks.
@@ -32,13 +33,8 @@ func _ready():
 	if white_keys.get_child_count() != black_keys.get_child_count():
 		_add_placeholder_key(black_keys)
 	
-	# Setup WebSocket
+	# Get reference to WebSocket manager
 	websocket_manager = $HyperShip/WebSocketManager
-	websocket_manager.setup("ws://localhost:8080")  # Replace with your WebSocket server URL
-	websocket_manager.connect("connected", _on_websocket_connected)
-	websocket_manager.connect("connection_error", _on_websocket_error)
-	websocket_manager.connect("data_received", _on_websocket_data_received)
-	websocket_manager.connect("disconnected", _on_websocket_disconnected)
 	
 	# Setup UI
 	play_button.connect("pressed", _on_play_button_pressed)
@@ -46,35 +42,58 @@ func _ready():
 	OS.open_midi_inputs()
 	print(OS.get_connected_midi_inputs())
 
+func _on_connection_state_changed(state: int):
+	match state:
+		WebSocketPeer.STATE_OPEN:
+			connection_status.text = "Connected"
+			connection_status.modulate = Color(0, 1, 0)  # Green
+		WebSocketPeer.STATE_CLOSING:
+			connection_status.text = "Closing..."
+			connection_status.modulate = Color(1, 0.5, 0)  # Orange
+		WebSocketPeer.STATE_CLOSED:
+			connection_status.text = "Disconnected"
+			connection_status.modulate = Color(1, 0, 0)  # Red
+		_:
+			connection_status.text = "Connecting..."
+			connection_status.modulate = Color(1, 1, 0)  # Yellow
+
 func _on_play_button_pressed():
 	var username = username_input.text.strip_edges()
 	if username.is_empty():
 		print("Please enter a username")
 		return
 	
+	connection_status.text = "Connecting..."
+	connection_status.modulate = Color(1, 1, 0)  # Yellow
 	websocket_manager.connect_to_server()
 
 func _on_websocket_connected():
-	print("Connected to WebSocket server")
+	print("[WebSocket] ✅ Connected to server as: ", username_input.text)
 	play_button.disabled = true
 	username_input.editable = false
+	connection_status.text = "Connected"
+	connection_status.modulate = Color(0, 1, 0)  # Green
 
 func _on_websocket_error(error_message: String):
-	print("WebSocket error: ", error_message)
+	print("[WebSocket] ❌ Connection error: ", error_message)
 	play_button.disabled = false
 	username_input.editable = true
+	connection_status.text = "Connection Error"
+	connection_status.modulate = Color(1, 0, 0)  # Red
 
 func _on_websocket_disconnected(code: int, reason: String, was_clean: bool):
-	print("Disconnected from WebSocket server. Code: ", code, " Reason: ", reason)
+	print("[WebSocket] 🔌 Disconnected from server - Code: ", code, " Clean: ", was_clean, " Reason: ", reason)
 	play_button.disabled = false
 	username_input.editable = true
+	connection_status.text = "Disconnected"
+	connection_status.modulate = Color(1, 0, 0)  # Red
 
 func _on_websocket_data_received(data: Dictionary):
 	if data.has("type") and data["type"] == "piano_key":
 		var pitch = data.get("pitch")
 		var is_pressed = data.get("pressed", false)
 		var username = data.get("username", "Unknown")
-		print("[WebSocket] Received key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username)
+		print("[WebSocket] 🎵 Received key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username)
 		if pitch in piano_key_dict:
 			if is_pressed:
 				piano_key_dict[pitch].activate()
@@ -93,22 +112,27 @@ func _input(input_event):
 	
 	# Handle MIDI event
 	if midi_event.message == MIDI_MESSAGE_NOTE_ON:
+		print("[Piano] 🎹 Note ON - Pitch: ", midi_event.pitch, " Velocity: ", midi_event.velocity)
 		key.activate()
 		_broadcast_key_event(midi_event.pitch, true)
 	else:
+		print("[Piano] 🎹 Note OFF - Pitch: ", midi_event.pitch)
 		key.deactivate()
 		_broadcast_key_event(midi_event.pitch, false)
 
-func _broadcast_key_event(pitch: int, is_pressed: bool):
+func _broadcast_key_event(pitch: int, pressed: bool) -> void:
+	print("[Piano] 📤 Attempting to broadcast key event...")
 	if websocket_manager and websocket_manager.socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
 		var message = {
-			"type": "piano_key",
-			"pitch": pitch,
-			"pressed": is_pressed,
-			"username": username_input.text
+			"note": pitch,
+			"velocity": 100 if pressed else 0,
+			"timestamp": Time.get_unix_time_from_system()
 		}
-		print("[WebSocket] Broadcasting key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username_input.text)
+		print("[Piano] 📤 Broadcasting key event: ", message)
 		websocket_manager.send_message(message)
+	else:
+		print("[Piano] ❌ Cannot broadcast - WebSocket not ready. State: ", 
+			websocket_manager.socket.get_ready_state() if websocket_manager and websocket_manager.socket else "No socket")
 
 func _add_placeholder_key(container):
 	var placeholder = Control.new()

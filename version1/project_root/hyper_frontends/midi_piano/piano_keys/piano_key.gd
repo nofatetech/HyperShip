@@ -15,7 +15,7 @@ const END_KEY = 108 #72 # 108
 
 func setup(pitch_index: int, rnote_index: float, rkeyname: String):
 	name = "PianoKey" + str(note_index)
-	print(name)
+	#print(name)
 	var exponent := (pitch_index - 69.0) / 12.0
 	pitch_scale = pow(2, exponent)
 	
@@ -24,7 +24,7 @@ func setup(pitch_index: int, rnote_index: float, rkeyname: String):
 	# Let's normalize the size between 0 and 100 based on pitch range (21-108)
 	var normalized_size = remap(pitch_index, 21, 108, 0, 100)
 	#$Graph1.size = Vector2(normalized_size * 10, $Graph1.size.y)  # Keep original height
-	print("pitch_index: " + str(pitch_index) + " normalized_size: " + str(normalized_size))
+	#print("pitch_index: " + str(pitch_index) + " normalized_size: " + str(normalized_size))
 	#$Graph1.size = Vector2(11, normalized_size * 1)  # Keep original height
 	$Graph1.size = Vector2(11, pitch_index * 7)  # Keep original height
 	#$Graph1.size = Vector2(33, 333)  # Keep original height

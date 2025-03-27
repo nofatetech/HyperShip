@@ -52,6 +52,16 @@ offset_right = 321.0
 offset_bottom = 177.0
 text = "Play"
 
+[node name="ConnectionStatus" type="Label" parent="."]
+layout_mode = 0
+offset_left = 331.0
+offset_top = 146.0
+offset_right = 531.0
+offset_bottom = 177.0
+text = "Not Connected"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="TextEdit" type="TextEdit" parent="."]
 layout_mode = 0
 offset_left = 38.0

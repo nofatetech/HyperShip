@@ -21,59 +21,97 @@ func setup(url: String):
 	websocket_url = url
 	if not url.begins_with("ws://") and not url.begins_with("wss://"):
 		websocket_url = "ws://" + url
+	# Add protocol path if not present
+	#if not websocket_url.ends_with("/piano"):
+		#websocket_url = websocket_url + "/piano"
 
-# Initiate a connection to the WebSocket server
-func connect_to_server():
+# Attempt to connect to the WebSocket server
+func connect_to_server() -> void:
 	if is_connecting:
+		print("[WebSocket] ⚠️ Already connecting, skipping...")
 		return
 		
-	is_connecting = true
-	print("Connecting to WebSocket server: ", websocket_url)
+	print("[WebSocket] 🔌 Attempting to connect to ", websocket_url)
 	
+	# Clean up any existing connection
+	if socket:
+		print("[WebSocket] 🧹 Cleaning up existing connection...")
+		socket.close()
+		socket = null
+		is_connecting = false
+	
+	# Create new WebSocket connection
+	socket = WebSocketPeer.new()
+	
+	# Add a small delay before connecting
+	await get_tree().create_timer(0.5).timeout
+	
+	# Connect to the server
 	var err = socket.connect_to_url(websocket_url)
 	if err != OK:
-		var error_message = "Unable to connect to %s. Error code: %d" % [websocket_url, err]
-		print(error_message)
-		emit_signal("connection_error", error_message)
+		print("[WebSocket] ❌ Failed to initiate connection. Error code: ", err)
 		is_connecting = false
 		return
 	
-	# Start processing to handle the connection
-	set_process(true)
+	is_connecting = true
+	print("[WebSocket] 🔄 Connection initiated, waiting for state change...")
 	
-	# Wait for the socket to connect with timeout
-	var timeout = 5.0
-	while timeout > 0 and socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
-		await get_tree().create_timer(0.1).timeout
+	# Wait for connection with timeout
+	var timeout = 5.0  # 5 second timeout
+	var last_state = -1
+	var poll_count = 0
+	
+	while timeout > 0:
+		# Poll the socket
+		socket.poll()
+		poll_count += 1
+		
+		var state = socket.get_ready_state()
+		
+		# Log state changes and periodic updates
+		if state != last_state or poll_count % 10 == 0:
+			print("[WebSocket] 📊 State: ", _get_state_name(state), " Timeout: ", timeout, " Polls: ", poll_count)
+			last_state = state
+		
+		match state:
+			WebSocketPeer.STATE_OPEN:
+				print("[WebSocket] ✅ Connected successfully!")
+				is_connecting = false
+				reconnect_attempts = 0  # Reset reconnect attempts on success
+				emit_signal("connected")
+				return
+			WebSocketPeer.STATE_CLOSED:
+				var code = socket.get_close_code()
+				var reason = socket.get_close_reason()
+				print("[WebSocket] ❌ Connection closed. Code: ", code, " Reason: ", reason)
+				is_connecting = false
+				emit_signal("connection_error")
+				return
+			WebSocketPeer.STATE_CONNECTING:
+				if poll_count % 10 == 0:
+					print("[WebSocket] ⏳ Still connecting... Timeout: ", timeout)
+		
 		timeout -= 0.1
+		await get_tree().create_timer(0.1).timeout
 	
-	if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
-		print("Successfully connected to WebSocket server")
-		reconnect_attempts = 0
-		emit_signal("connected")
-	else:
-		emit_signal("connection_error", "Connection timeout")
-	
+	print("[WebSocket] ❌ Connection timeout to ", websocket_url, ". Final state: ", _get_state_name(last_state))
+	print("[WebSocket] 📊 Total polls: ", poll_count)
 	is_connecting = false
+	emit_signal("connection_error")
 
-# Reconnect to WebSocket with a new URL or token
-func reconnect(new_url: String = ""):
-	if new_url != "":
-		websocket_url = new_url
-		if not websocket_url.begins_with("ws://") and not websocket_url.begins_with("wss://"):
-			websocket_url = "ws://" + websocket_url
-	
-	if reconnect_attempts >= MAX_RECONNECT_ATTEMPTS:
-		emit_signal("connection_error", "Max reconnection attempts reached")
-		return
-	
-	reconnect_attempts += 1
-	print("Reconnecting... Attempt %d of %d" % [reconnect_attempts, MAX_RECONNECT_ATTEMPTS])
-	
-	if socket.get_ready_state() != WebSocketPeer.STATE_CLOSED:
-		socket.close()
-	
-	connect_to_server()
+# Helper function to get state name
+func _get_state_name(state: int) -> String:
+	match state:
+		WebSocketPeer.STATE_OPEN:
+			return "OPEN"
+		WebSocketPeer.STATE_CLOSING:
+			return "CLOSING"
+		WebSocketPeer.STATE_CLOSED:
+			return "CLOSED"
+		WebSocketPeer.STATE_CONNECTING:
+			return "CONNECTING"
+		_:
+			return "UNKNOWN"
 
 # Poll WebSocket to check for incoming messages and handle connections
 func _process(delta):
@@ -94,9 +132,10 @@ func _process(delta):
 				if data:
 					emit_signal("data_received", data)
 				else:
-					print("Received invalid JSON data")
+					print("[WebSocket] ⚠️ Received invalid JSON data")
 		
 		WebSocketPeer.STATE_CLOSING:
+			print("[WebSocket] 🔄 Connection is closing...")
 			# Wait for clean close
 			pass
 		
@@ -104,20 +143,29 @@ func _process(delta):
 			var code = socket.get_close_code()
 			var reason = socket.get_close_reason()
 			var was_clean = code != -1
-			print("WebSocket closed with code: %d. Clean: %s. Reason: %s" % [code, was_clean, reason])
+			print("[WebSocket] 🔌 Connection closed - Code: %d, Clean: %s, Reason: %s" % [code, was_clean, reason])
 			emit_signal("disconnected", code, reason, was_clean)
 			set_process(false)
+			
+			# Only attempt to reconnect if we're not already connecting
+			if not is_connecting and reconnect_attempts < MAX_RECONNECT_ATTEMPTS:
+				reconnect_attempts += 1
+				print("[WebSocket] 🔄 Attempting to reconnect (%d/%d)..." % [reconnect_attempts, MAX_RECONNECT_ATTEMPTS])
+				await get_tree().create_timer(2.0).timeout
+				connect_to_server()
+			else:
+				print("[WebSocket] ❌ Max reconnection attempts reached or already connecting")
 
 # Send a message to the server
 func send_message(data: Dictionary) -> bool:
 	if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
-		print("Cannot send message: WebSocket not connected")
+		print("[WebSocket] ❌ Cannot send message: WebSocket not connected")
 		return false
 	
 	var json_string = JSON.stringify(data)
 	var err = socket.send_text(json_string)
 	if err != OK:
-		print("Failed to send message. Error code: ", err)
+		print("[WebSocket] ❌ Failed to send message. Error code: ", err)
 		return false
 	return true
 
