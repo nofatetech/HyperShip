@@ -9,6 +9,9 @@ var note_index: float
 @onready var start_color: Color = key.color
 @onready var color_timer: Timer = $ColorTimer
 
+const START_KEY = 48 # 21
+const END_KEY = 108 #72 # 108
+
 
 func setup(pitch_index: int, rnote_index: float, rkeyname: String):
 	name = "PianoKey" + str(note_index)

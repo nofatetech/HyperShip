@@ -73,6 +73,8 @@ func _on_websocket_data_received(data: Dictionary):
 	if data.has("type") and data["type"] == "piano_key":
 		var pitch = data.get("pitch")
 		var is_pressed = data.get("pressed", false)
+		var username = data.get("username", "Unknown")
+		print("[WebSocket] Received key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username)
 		if pitch in piano_key_dict:
 			if is_pressed:
 				piano_key_dict[pitch].activate()
@@ -105,6 +107,7 @@ func _broadcast_key_event(pitch: int, is_pressed: bool):
 			"pressed": is_pressed,
 			"username": username_input.text
 		}
+		print("[WebSocket] Broadcasting key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username_input.text)
 		websocket_manager.send_message(message)
 
 func _add_placeholder_key(container):
