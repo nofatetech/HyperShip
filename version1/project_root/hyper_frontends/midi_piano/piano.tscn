@@ -44,28 +44,31 @@ script = ExtResource("2_lmi58")
 [node name="AuthManager" type="Node" parent="HyperShip"]
 script = ExtResource("3_p0iyf")
 
-[node name="Button" type="Button" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 271.0
-offset_top = 146.0
-offset_right = 321.0
-offset_bottom = 177.0
+offset_left = 11.0
+offset_top = 140.0
+offset_right = 1215.0
+offset_bottom = 180.0
+
+[node name="TextEdit" type="TextEdit" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Your Name or Username"
+
+[node name="Button" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Play"
 
-[node name="ConnectionStatus" type="Label" parent="."]
-layout_mode = 0
-offset_left = 331.0
-offset_top = 146.0
-offset_right = 531.0
-offset_bottom = 177.0
+[node name="ConnectionStatus" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Not Connected"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TextEdit" type="TextEdit" parent="."]
+[node name="NotesGridContainer" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 38.0
-offset_top = 142.0
-offset_right = 251.0
-offset_bottom = 172.0
-placeholder_text = "Your Name or Username"
+offset_right = 40.0
+offset_bottom = 40.0

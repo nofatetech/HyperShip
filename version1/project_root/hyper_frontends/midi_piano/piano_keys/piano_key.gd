@@ -4,16 +4,21 @@ extends Control
 var pitch_scale: float
 var note_index: float
 
+signal piano_key_activate(pitch_index: int)
+signal piano_key_deactivate(pitch_index: int)
 
 @onready var key: ColorRect = $Key
 @onready var start_color: Color = key.color
 @onready var color_timer: Timer = $ColorTimer
+
+var pitch_index: int = -1
 
 const START_KEY = 48 # 21
 const END_KEY = 108 #72 # 108
 
 
 func setup(pitch_index: int, rnote_index: float, rkeyname: String):
+	pitch_index = pitch_index
 	name = "PianoKey" + str(note_index)
 	#print(name)
 	var exponent := (pitch_index - 69.0) / 12.0
@@ -49,6 +54,8 @@ func activate():
 	$Label2.visible = true
 	$Label2.text = "" + str(note_index) # + str(pitch_scale)
 	
+	piano_key_activate.emit(pitch_scale)
+	
 	#TODO: animation
 	#print("!! KEY !! pitch_scale:" + str(pitch_scale))
 	#print("*** TODO: send websocket message. user, pitch_scale:" + str(pitch_scale))
@@ -60,3 +67,6 @@ func activate():
 func deactivate():
 	key.color = start_color
 	$Label2.visible = false
+	
+	piano_key_deactivate.emit(pitch_scale)
+	

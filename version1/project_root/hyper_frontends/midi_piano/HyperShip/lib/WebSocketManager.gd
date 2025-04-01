@@ -2,6 +2,11 @@
 extends Node
 class_name WebSocketManager
 
+var is_enabled := false
+var do_print_logs := false
+
+
+
 # Signals to broadcast WebSocket events
 signal connected
 signal connection_error(error_message: String)
@@ -28,14 +33,14 @@ func setup(url: String):
 # Attempt to connect to the WebSocket server
 func connect_to_server() -> void:
 	if is_connecting:
-		print("[WebSocket] ⚠️ Already connecting, skipping...")
+		print("[WebSocketManager] ⚠️ Already connecting, skipping...")
 		return
 		
-	print("[WebSocket] 🔌 Attempting to connect to ", websocket_url)
+	print("[WebSocketManager] 🔌 Attempting to connect to ", websocket_url)
 	
 	# Clean up any existing connection
 	if socket:
-		print("[WebSocket] 🧹 Cleaning up existing connection...")
+		print("[WebSocketManager] 🧹 Cleaning up existing connection...")
 		socket.close()
 		socket = null
 		is_connecting = false
@@ -49,12 +54,12 @@ func connect_to_server() -> void:
 	# Connect to the server
 	var err = socket.connect_to_url(websocket_url)
 	if err != OK:
-		print("[WebSocket] ❌ Failed to initiate connection. Error code: ", err)
+		print("[WebSocketManager] ❌ Failed to initiate connection. Error code: ", err)
 		is_connecting = false
 		return
 	
 	is_connecting = true
-	print("[WebSocket] 🔄 Connection initiated, waiting for state change...")
+	print("[WebSocketManager] 🔄 Connection initiated, waiting for state change...")
 	
 	# Wait for connection with timeout
 	var timeout = 5.0  # 5 second timeout
@@ -70,12 +75,12 @@ func connect_to_server() -> void:
 		
 		# Log state changes and periodic updates
 		if state != last_state or poll_count % 10 == 0:
-			print("[WebSocket] 📊 State: ", _get_state_name(state), " Timeout: ", timeout, " Polls: ", poll_count)
+			print("[WebSocketManager] 📊 State: ", _get_state_name(state), " Timeout: ", timeout, " Polls: ", poll_count)
 			last_state = state
 		
 		match state:
 			WebSocketPeer.STATE_OPEN:
-				print("[WebSocket] ✅ Connected successfully!")
+				print("[WebSocketManager] ✅ Connected successfully!")
 				is_connecting = false
 				reconnect_attempts = 0  # Reset reconnect attempts on success
 				emit_signal("connected")
@@ -83,19 +88,19 @@ func connect_to_server() -> void:
 			WebSocketPeer.STATE_CLOSED:
 				var code = socket.get_close_code()
 				var reason = socket.get_close_reason()
-				print("[WebSocket] ❌ Connection closed. Code: ", code, " Reason: ", reason)
+				print("[WebSocketManager] ❌ Connection closed. Code: ", code, " Reason: ", reason)
 				is_connecting = false
 				emit_signal("connection_error")
 				return
 			WebSocketPeer.STATE_CONNECTING:
 				if poll_count % 10 == 0:
-					print("[WebSocket] ⏳ Still connecting... Timeout: ", timeout)
+					print("[WebSocketManager] ⏳ Still connecting... Timeout: ", timeout)
 		
 		timeout -= 0.1
 		await get_tree().create_timer(0.1).timeout
 	
-	print("[WebSocket] ❌ Connection timeout to ", websocket_url, ". Final state: ", _get_state_name(last_state))
-	print("[WebSocket] 📊 Total polls: ", poll_count)
+	print("[WebSocketManager] ❌ Connection timeout to ", websocket_url, ". Final state: ", _get_state_name(last_state))
+	print("[WebSocketManager] 📊 Total polls: ", poll_count)
 	is_connecting = false
 	emit_signal("connection_error")
 
@@ -115,6 +120,9 @@ func _get_state_name(state: int) -> String:
 
 # Poll WebSocket to check for incoming messages and handle connections
 func _process(delta):
+	if not is_enabled:
+		return
+	
 	if not socket:
 		return
 		
@@ -132,10 +140,10 @@ func _process(delta):
 				if data:
 					emit_signal("data_received", data)
 				else:
-					print("[WebSocket] ⚠️ Received invalid JSON data")
+					print("[WebSocketManager] ⚠️ Received invalid JSON data")
 		
 		WebSocketPeer.STATE_CLOSING:
-			print("[WebSocket] 🔄 Connection is closing...")
+			print("[WebSocketManager] 🔄 Connection is closing...")
 			# Wait for clean close
 			pass
 		
@@ -143,29 +151,29 @@ func _process(delta):
 			var code = socket.get_close_code()
 			var reason = socket.get_close_reason()
 			var was_clean = code != -1
-			print("[WebSocket] 🔌 Connection closed - Code: %d, Clean: %s, Reason: %s" % [code, was_clean, reason])
+			print("[WebSocketManager] 🔌 Connection closed - Code: %d, Clean: %s, Reason: %s" % [code, was_clean, reason])
 			emit_signal("disconnected", code, reason, was_clean)
 			set_process(false)
 			
 			# Only attempt to reconnect if we're not already connecting
 			if not is_connecting and reconnect_attempts < MAX_RECONNECT_ATTEMPTS:
 				reconnect_attempts += 1
-				print("[WebSocket] 🔄 Attempting to reconnect (%d/%d)..." % [reconnect_attempts, MAX_RECONNECT_ATTEMPTS])
+				print("[WebSocketManager] 🔄 Attempting to reconnect (%d/%d)..." % [reconnect_attempts, MAX_RECONNECT_ATTEMPTS])
 				await get_tree().create_timer(2.0).timeout
 				connect_to_server()
 			else:
-				print("[WebSocket] ❌ Max reconnection attempts reached or already connecting")
+				print("[WebSocketManager] ❌ Max reconnection attempts reached or already connecting")
 
 # Send a message to the server
 func send_message(data: Dictionary) -> bool:
 	if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
-		print("[WebSocket] ❌ Cannot send message: WebSocket not connected")
+		print("[WebSocketManager] ❌ Cannot send message: WebSocket not connected")
 		return false
 	
 	var json_string = JSON.stringify(data)
 	var err = socket.send_text(json_string)
 	if err != OK:
-		print("[WebSocket] ❌ Failed to send message. Error code: ", err)
+		print("[WebSocketManager] ❌ Failed to send message. Error code: ", err)
 		return false
 	return true
 
