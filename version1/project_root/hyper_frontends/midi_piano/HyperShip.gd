@@ -1,12 +1,46 @@
 extends Node2D
+class_name HyperShip
+
+var url_params: Dictionary = {}
+
+
 var websocket_manager: WebSocketManager
 
 @onready var xauth = $AuthManager
 @onready var piano = get_parent()  # HyperShip is a child of Piano node
 
 
+
+func get_url_param(param_name: String) -> String:
+	return url_params.get(param_name, "") 
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+
+	if OS.has_feature("web"):
+		# Get URL parameters using JavaScript
+		var js_code = """
+		function getUrlParams() {
+			const params = new URLSearchParams(window.location.search);
+			const result = {};
+			for (const [key, value] of params) {
+				result[key] = value;
+			}
+			return result;
+		}
+		getUrlParams();
+		"""
+		
+		var params = JavaScriptBridge.eval(js_code)
+		if params:
+			url_params = params
+			print("URL Parameters:", url_params)
+	else:
+		print("Not running in web context")
+
+
+
 	# Initialize WebSocketManager
 	websocket_manager = $WebSocketManager
 	#websocket_manager.setup("ws://127.0.0.1:6001")

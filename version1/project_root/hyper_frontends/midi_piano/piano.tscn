@@ -51,15 +51,24 @@ offset_top = 140.0
 offset_right = 1215.0
 offset_bottom = 180.0
 
+[node name="Token2" type="TextEdit" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Token"
+
+[node name="Login" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Login"
+
 [node name="TextEdit" type="TextEdit" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Your Name or Username"
 
 [node name="Button" type="Button" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Play"
+text = "Play3"
 
 [node name="ConnectionStatus" type="Label" parent="HBoxContainer"]
 layout_mode = 2
@@ -68,7 +77,16 @@ text = "Not Connected"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="Token" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TK?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="NotesGridContainer" type="GridContainer" parent="."]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[connection signal="button_up" from="HBoxContainer/Login" to="." method="_on_login_button_up"]
