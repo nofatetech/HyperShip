@@ -52,7 +52,7 @@ func activate():
 	color_timer.start()
 	
 	$Label2.visible = true
-	$Label2.text = "" + str(note_index) # + str(pitch_scale)
+	$Label2.text = "" + str(pitch_scale) # + str(pitch_scale)
 	
 	piano_key_activate.emit(pitch_scale)
 	

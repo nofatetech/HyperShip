@@ -17,6 +17,7 @@ var piano_key_dict := Dictionary()
 var websocket_manager: WebSocketManager
 var received_notes_grid: GridContainer
 var username: String = ""
+var state_check_timer: Timer
 
 @onready var white_keys = $Container/WhiteKeys
 @onready var black_keys = $Container/BlackKeys
@@ -26,9 +27,13 @@ var username: String = ""
 
 @onready var hypership = $HyperShip
 
-
 func _ready():
-
+	# Create state check timer
+	state_check_timer = Timer.new()
+	state_check_timer.wait_time = 1.0  # Check every second
+	state_check_timer.timeout.connect(_check_websocket_state)
+	add_child(state_check_timer)
+	state_check_timer.start()
 	
 	# Get reference to WebSocket manager
 	websocket_manager = hypership.websocket_manager
@@ -38,17 +43,12 @@ func _ready():
 	websocket_manager.connect("connected", _on_websocket_connected)
 	websocket_manager.connect("disconnected", _on_websocket_disconnected)
 	websocket_manager.connect("data_received", _on_websocket_data_received)
-	websocket_manager.connect("disconnected", _on_websocket_disconnected)
 	websocket_manager.connect("connection_error", _on_websocket_connection_error)
 	websocket_manager.connect("connection_state_changed", _on_websocket_connection_state_changed)
 	websocket_manager.connect_to_server()
 
 	connection_status.text = "Connecting..."
 	connection_status.modulate = Color(1, 1, 0)  # Yellow
-
-
-
-
 
 	# Sanity checks.
 	if _is_note_index_sharp(_pitch_index_to_note_index(START_KEY)):
@@ -74,32 +74,42 @@ func _ready():
 		var tk = hypership.get_url_param("tk")
 		print("tk from URL:", tk)
 
-
-func _print_midi_info(midi_event: InputEventMIDI):
-	print(midi_event)
-	print("Channel: " + str(midi_event.channel))
-	print("Message: " + str(midi_event.message))
-	print("Pitch: " + str(midi_event.pitch))
-	print("Velocity: " + str(midi_event.velocity))
-	print("Instrument: " + str(midi_event.instrument))
-	print("Pressure: " + str(midi_event.pressure))
-	print("Controller number: " + str(midi_event.controller_number))
-	print("Controller value: " + str(midi_event.controller_value))
-
-
-#region AUTH
-
-func _on_play_button_pressed():
-	var username = username_input.text.strip_edges()
-	if username.is_empty():
-		print("Please enter a username")
+func _check_websocket_state():
+	if not websocket_manager or not websocket_manager.socket:
+		_handle_disconnected_state()
 		return
+		
+	var state = websocket_manager.socket.get_ready_state()
+	if state != WebSocketPeer.STATE_OPEN:
+		_handle_disconnected_state()
+		return
+		
+	# If we're supposed to be connected but haven't received data in a while,
+	# try sending a ping to check the connection
+	if state == WebSocketPeer.STATE_OPEN:
+		var message = {
+			"type": "ping",
+			"timestamp": Time.get_unix_time_from_system()
+		}
+		websocket_manager.send_message(message)
 
-#endregion
-
-#region WEBSOCKET
+func _handle_disconnected_state():
+	print("[Piano] 🔍 Detected disconnected state during periodic check")
+	play_button.disabled = false
+	username_input.editable = true
+	connection_status.text = "Disconnected"
+	connection_status.modulate = Color(1, 0, 0)  # Red
+	
+	# Attempt to reconnect
+	await get_tree().create_timer(2.0).timeout
+	if not websocket_manager.socket or websocket_manager.socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		print("[Piano] 🔄 Attempting to reconnect...")
+		connection_status.text = "Reconnecting..."
+		connection_status.modulate = Color(1, 1, 0)  # Yellow
+		websocket_manager.connect_to_server()
 
 func _on_websocket_connection_state_changed(state: int):
+	print("[Piano] 🔄 Connection state changed to: ", state)
 	match state:
 		WebSocketPeer.STATE_OPEN:
 			connection_status.text = "Connected"
@@ -108,8 +118,7 @@ func _on_websocket_connection_state_changed(state: int):
 			connection_status.text = "Closing..."
 			connection_status.modulate = Color(1, 0.5, 0)  # Orange
 		WebSocketPeer.STATE_CLOSED:
-			connection_status.text = "Disconnected"
-			connection_status.modulate = Color(1, 0, 0)  # Red
+			_handle_disconnected_state()
 		_:
 			connection_status.text = "Connecting..."
 			connection_status.modulate = Color(1, 1, 0)  # Yellow
@@ -134,6 +143,14 @@ func _on_websocket_disconnected(code: int, reason: String, was_clean: bool):
 	username_input.editable = true
 	connection_status.text = "Disconnected"
 	connection_status.modulate = Color(1, 0, 0)  # Red
+	
+	# Attempt to reconnect after a delay
+	await get_tree().create_timer(2.0).timeout  # Wait 2 seconds before reconnecting
+	if not websocket_manager.socket or websocket_manager.socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		print("[Piano] 🔄 Attempting to reconnect...")
+		connection_status.text = "Reconnecting..."
+		connection_status.modulate = Color(1, 1, 0)  # Yellow
+		websocket_manager.connect_to_server()
 
 func _on_websocket_data_received(data: Dictionary):
 	if data.has("type") and data["type"] == "piano_key":
@@ -157,21 +174,20 @@ func _on_websocket_data_received(data: Dictionary):
 			circle.position.x = key.position.x + key.size.x / 2 - circle.size.x / 2
 			circle.setup(username, pitch_index, pitch_index)
 
-func _broadcast_key_event(pitch: int, pressed: bool) -> void:
+func _broadcast_key_event(pitch_index: float, pressed: bool) -> void:
 	#print("[Piano] 📤 Attempting to broadcast key event...")
 	if websocket_manager and websocket_manager.socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
 		var message = {
-			"note": pitch,
+			"pitch_index": pitch_index,
 			"velocity": 100 if pressed else 0,
-			"timestamp": Time.get_unix_time_from_system()
+			"timestamp": Time.get_unix_time_from_system(),
+			"username": "Unknown",
 		}
 		print("[Piano] 📤 Broadcasting key event: ", message)
 		websocket_manager.send_message(message)
 	else:
 		print("[Piano] ❌ Cannot broadcast - WebSocket not ready. State: ", 
 			websocket_manager.socket.get_ready_state() if websocket_manager and websocket_manager.socket else "No socket")
-
-#endregion
 
 func _input(input_event):
 	if not (input_event is InputEventMIDI):
@@ -232,15 +248,44 @@ func _pitch_index_to_note_index(pitch: int):
 	return pitch % 12
 #endregion
 
-func _on_piano_key_activate(pitch_index: int):
+func _on_piano_key_activate(pitch_index: float):
 	print("_on_piano_key_activate "+ str(pitch_index))
 	_broadcast_key_event(pitch_index, true)
 
-func _on_piano_key_deactivate(pitch_index: int):
+func _on_piano_key_deactivate(pitch_index: float):
 	print("_on_piano_key_deactivate")
 	_broadcast_key_event(pitch_index, false)
 
+func _on_play_button_pressed():
+	var username = username_input.text.strip_edges()
+	if username.is_empty():
+		print("Please enter a username")
+		return
+		
+	# Send authentication message
+	var message = {
+		"type": "auth",
+		"username": username
+	}
+	websocket_manager.send_message(message)
+	
+	# Update UI
+	play_button.disabled = true
+	username_input.editable = false
+	connection_status.text = "Authenticating..."
+	connection_status.modulate = Color(1, 1, 0)  # Yellow
 
 func _on_login_button_up() -> void:
 	
 	pass # Replace with function body.
+
+func _print_midi_info(midi_event: InputEventMIDI):
+	print(midi_event)
+	print("Channel: " + str(midi_event.channel))
+	print("Message: " + str(midi_event.message))
+	print("Pitch: " + str(midi_event.pitch))
+	print("Velocity: " + str(midi_event.velocity))
+	print("Instrument: " + str(midi_event.instrument))
+	print("Pressure: " + str(midi_event.pressure))
+	print("Controller number: " + str(midi_event.controller_number))
+	print("Controller value: " + str(midi_event.controller_value))
