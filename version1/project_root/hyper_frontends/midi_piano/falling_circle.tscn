@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6x8j6q8q8q8q"]
+
+[ext_resource type="Script" path="res://falling_circle.gd" id="1_2j4k5"]
+
+[node name="FallingCircle" type="Control"]
+script = ExtResource("1_2j4k5")
+custom_minimum_size = Vector2(40, 40)
+
+[node name="Circle" type="ColorRect" parent="."]
+size = Vector2(40, 40)
+position = Vector2(0, 0)
+color = Color(0, 1, 0, 1)
+
+[node name="Username" type="Label" parent="."]
+size = Vector2(40, 20)
+position = Vector2(0, 20)
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "User"
+font_size = 12 

@@ -11,6 +11,7 @@ const END_KEY = 108 #72 # 108
 
 const WhiteKeyScene = preload("res://piano_keys/white_piano_key.tscn")
 const BlackKeyScene = preload("res://piano_keys/black_piano_key.tscn")
+const FallingCircleScene = preload("res://falling_circle.tscn")
 
 var piano_key_dict := Dictionary()
 var websocket_manager: WebSocketManager
@@ -136,16 +137,25 @@ func _on_websocket_disconnected(code: int, reason: String, was_clean: bool):
 
 func _on_websocket_data_received(data: Dictionary):
 	if data.has("type") and data["type"] == "piano_key":
-		var pitch = data.get("pitch")
-		var is_pressed = data.get("pressed", false)
-		var username = data.get("username", "Unknown")
-		print("[Piano] 🎵 Received key event - Pitch: ", pitch, " Pressed: ", is_pressed, " User: ", username)
-#		XXX TODO!!!
-		#if pitch in piano_key_dict:
-			#if is_pressed:
-				#piano_key_dict[pitch].activate()
-			#else:
-				#piano_key_dict[pitch].deactivate()
+		#pitch_index, velocity, timestamp
+		var pitch_index: float = data.get("pitch_index", 0.0)
+		var velocity: int = data.get("velocity", 0)
+		var timestamp: float = data.get("timestamp", 0.0)
+		var username: String = data.get("username", "Unknown")
+		
+		#var is_pressed = data.get("pressed", false)
+		#var username = data.get("username", "Unknown")
+		print("[Piano] 🎵 Received key event - Pitch: ", pitch_index, " pitch_index: ", velocity, "username: ", username, " timestamp: ", timestamp)
+		
+		# Create and setup falling circle
+		var circle = FallingCircleScene.instantiate()
+		add_child(circle)
+		
+		# Position the circle above the corresponding key
+		if pitch_index in piano_key_dict:
+			var key = piano_key_dict[pitch_index]
+			circle.position.x = key.position.x + key.size.x / 2 - circle.size.x / 2
+			circle.setup(username, pitch_index, pitch_index)
 
 func _broadcast_key_event(pitch: int, pressed: bool) -> void:
 	#print("[Piano] 📤 Attempting to broadcast key event...")
@@ -155,7 +165,7 @@ func _broadcast_key_event(pitch: int, pressed: bool) -> void:
 			"velocity": 100 if pressed else 0,
 			"timestamp": Time.get_unix_time_from_system()
 		}
-		#print("[Piano] 📤 Broadcasting key event: ", message)
+		print("[Piano] 📤 Broadcasting key event: ", message)
 		websocket_manager.send_message(message)
 	else:
 		print("[Piano] ❌ Cannot broadcast - WebSocket not ready. State: ", 
