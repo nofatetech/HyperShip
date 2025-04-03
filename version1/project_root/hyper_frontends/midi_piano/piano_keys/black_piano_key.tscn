@@ -27,6 +27,7 @@ script = ExtResource("2")
 one_shot = true
 
 [node name="Label2" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 4.0
 offset_top = 117.0

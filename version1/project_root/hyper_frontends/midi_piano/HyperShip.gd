@@ -22,6 +22,11 @@ func _ready() -> void:
 		# Get URL parameters using JavaScript
 		var js_code = """
 		function getUrlParams() {
+			return {"a":"b"};
+			return Object.fromEntries(new URLSearchParams(window.location.search));
+		}
+		function getUrlParams2() {
+			return {"a2":"b2"};
 			const params = new URLSearchParams(window.location.search);
 			const result = {};
 			for (const [key, value] of params) {
