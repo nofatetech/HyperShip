@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class WebSocketServer extends Command
 {
@@ -25,6 +27,7 @@ class WebSocketServer extends Command
     protected $read = [];
     protected $write = [];
     protected $except = [];
+    protected $authenticatedClients = [];
 
     /**
      * Execute the console command.
@@ -95,9 +98,28 @@ class WebSocketServer extends Command
                         // Parse WebSocket frame
                         $frame = $this->parseFrame($data);
                         if ($frame) {
-                            $this->info('Received message: ' . $frame);
-                            // Broadcast to all clients
-                            $this->broadcast($frame);
+                            $message = json_decode($frame, true);
+                            
+                            // Log raw message
+                            $this->info('Raw message received: ' . $frame);
+                            
+                            // Log parsed message if it's valid JSON
+                            if (json_last_error() === JSON_ERROR_NONE) {
+                                // $this->info('Parsed message: ' . json_encode($message, JSON_PRETTY_PRINT));
+                            }
+                            
+                            // Handle authentication message
+                            if (isset($message['type']) && $message['type'] === 'auth') {
+                                $this->handleAuth($client, $message);
+                                continue;
+                            }
+                            
+                            // Only process messages from authenticated clients
+                            $clientId = stream_socket_get_name($client, true);
+                            if (isset($this->authenticatedClients[$clientId])) {
+                                $this->info('Received message: ' . $frame);
+                                $this->broadcast($frame);
+                            }
                         }
                     }
                 }
@@ -143,24 +165,50 @@ class WebSocketServer extends Command
         return true;
     }
 
-    protected function handleClient($client)
+    protected function handleAuth($client, $message)
     {
-        while (true) {
-            $data = fread($client, 8192);
-            
-            if ($data === false || $data === '') {
-                $this->removeClient($client);
-                break;
-            }
-
-            // Parse WebSocket frame
-            $frame = $this->parseFrame($data);
-            if ($frame) {
-                $this->info('Received message: ' . $frame);
-                // Broadcast to all clients
-                $this->broadcast($frame);
-            }
+        if (!isset($message['token'])) {
+            $this->sendError($client, 'Authentication token required');
+            return;
         }
+
+        $token = $message['token'];
+        
+        // Verify the token using Laravel's authentication
+        try {
+            $user = Auth::guard('api')->user();
+            if ($user) {
+                $clientId = stream_socket_get_name($client, true);
+                $this->authenticatedClients[$clientId] = $user->id;
+                $this->sendSuccess($client, 'Authentication successful');
+                $this->info("Client authenticated as user {$user->id}");
+            } else {
+                $this->sendError($client, 'Invalid authentication token');
+            }
+        } catch (\Exception $e) {
+            $this->sendError($client, 'Authentication failed');
+            $this->error('Auth error: ' . $e->getMessage());
+        }
+    }
+
+    protected function sendError($client, $message)
+    {
+        $response = json_encode([
+            'type' => 'error',
+            'message' => $message
+        ]);
+        $frame = $this->createFrame($response);
+        fwrite($client, $frame);
+    }
+
+    protected function sendSuccess($client, $message)
+    {
+        $response = json_encode([
+            'type' => 'success',
+            'message' => $message
+        ]);
+        $frame = $this->createFrame($response);
+        fwrite($client, $frame);
     }
 
     protected function parseFrame($data)
@@ -239,6 +287,8 @@ class WebSocketServer extends Command
         $key = array_search($client, $this->clients);
         if ($key !== false) {
             unset($this->clients[$key]);
+            $clientId = stream_socket_get_name($client, true);
+            unset($this->authenticatedClients[$clientId]);
             fclose($client);
             $this->info('Client disconnected. Total connections: ' . count($this->clients));
         }

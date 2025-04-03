@@ -2,10 +2,12 @@
 <html>
 <head>
     <title>WebSocket Test</title>
+    <meta name="auth-token" content="{{ $token }}">
     <script>
         let ws = null;
         let reconnectAttempts = 0;
         const maxReconnectAttempts = 5;
+        let isAuthenticated = false;
 
         function connectWebSocket() {
             try {
@@ -16,15 +18,31 @@
                     reconnectAttempts = 0;
                     document.getElementById('status').textContent = 'Connected';
                     document.getElementById('status').style.color = 'green';
+                    
+                    // Authenticate after connection
+                    authenticate();
                 };
 
                 ws.onmessage = function(event) {
                     console.log('Received message:', event.data);
-                    document.getElementById('events').innerHTML += `<div>${event.data}</div>`;
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'success') {
+                        isAuthenticated = true;
+                        document.getElementById('status').textContent = 'Authenticated';
+                        document.getElementById('status').style.color = 'green';
+                    } else if (data.type === 'error') {
+                        isAuthenticated = false;
+                        document.getElementById('status').textContent = 'Authentication failed: ' + data.message;
+                        document.getElementById('status').style.color = 'red';
+                    } else {
+                        document.getElementById('events').innerHTML += `<div>${event.data}</div>`;
+                    }
                 };
 
                 ws.onclose = function() {
                     console.log('Disconnected from WebSocket server');
+                    isAuthenticated = false;
                     document.getElementById('status').textContent = 'Disconnected';
                     document.getElementById('status').style.color = 'red';
                     
@@ -42,6 +60,7 @@
 
                 ws.onerror = function(error) {
                     console.error('WebSocket error:', error);
+                    isAuthenticated = false;
                     document.getElementById('status').textContent = 'Error';
                     document.getElementById('status').style.color = 'red';
                 };
@@ -52,6 +71,23 @@
             }
         }
 
+        function authenticate() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                console.error('WebSocket is not connected');
+                return;
+            }
+
+            // Get the authentication token from the meta tag
+            const token = document.querySelector('meta[name="auth-token"]').content;
+            
+            const authMessage = {
+                type: 'auth',
+                token: token
+            };
+            
+            ws.send(JSON.stringify(authMessage));
+        }
+
         // Connect when page loads
         connectWebSocket();
 
@@ -59,6 +95,11 @@
         function sendTestNote() {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
                 console.error('WebSocket is not connected');
+                return;
+            }
+
+            if (!isAuthenticated) {
+                console.error('Not authenticated');
                 return;
             }
 
@@ -76,6 +117,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + document.querySelector('meta[name="auth-token"]').content
                 },
                 body: JSON.stringify(data)
             })
