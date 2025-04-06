@@ -89,4 +89,48 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="Control1" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -69.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Control2" type="Control" parent="Control1"]
+layout_mode = 1
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InputContainer" type="HBoxContainer" parent="Control1/Control2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="Control1/Control2/InputContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Username/Email"
+secret_character = "%"
+
+[node name="LineEdit2" type="LineEdit" parent="Control1/Control2/InputContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Password"
+secret = true
+secret_character = "%"
+
+[node name="Button" type="Button" parent="Control1/Control2/InputContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LOGIN"
+
 [connection signal="button_up" from="HBoxContainer/Login" to="." method="_on_login_button_up"]
