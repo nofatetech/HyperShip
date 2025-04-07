@@ -118,19 +118,26 @@ grow_vertical = 2
 [node name="LineEdit" type="LineEdit" parent="Control1/Control2/InputContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 33
 placeholder_text = "Username/Email"
 secret_character = "%"
 
 [node name="LineEdit2" type="LineEdit" parent="Control1/Control2/InputContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 33
 placeholder_text = "Password"
 secret = true
 secret_character = "%"
 
-[node name="Button" type="Button" parent="Control1/Control2/InputContainer"]
+[node name="LoginButton" type="Button" parent="Control1/Control2/InputContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 1, 0, 1)
+theme_override_font_sizes/font_size = 33
 text = "LOGIN"
 
 [connection signal="button_up" from="HBoxContainer/Login" to="." method="_on_login_button_up"]
+[connection signal="pressed" from="Control1/Control2/InputContainer/LoginButton" to="." method="_on_login_button_pressed"]

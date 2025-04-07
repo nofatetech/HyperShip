@@ -1,118 +1,211 @@
-# /lib/auth_manager.gd
-
+# auth_manager.gd
 extends Node
 
 class_name AuthManager
 
-var x_token: String = ""  # Stores the JWT token locally
-var x_is_authenticated := false
+# Signals
+signal login_completed(success: bool, data: Dictionary)
+signal token_verified(success: bool, data: Dictionary)
+signal api_request_completed(endpoint: String, success: bool, data: Dictionary)
+signal logout_completed(success: bool, data: Dictionary)
 
+# Authentication state
+enum AuthState { UNAUTHENTICATED, AUTHENTICATING, AUTHENTICATED, ERROR }
+var auth_state: AuthState = AuthState.UNAUTHENTICATED
+var token: String = ""
+var user_data: Dictionary = {}
+var token_expires: int = 0  # Unix timestamp in seconds
 
-func save_to_file(content):
-	var file = FileAccess.open("user://save_game.dat", FileAccess.WRITE)
-	file.store_string(content)
+# API Configuration
+const API_BASE_URL = "https://innovaciongt1.com/version-test/api/1.1/wf" # "http://127.0.0.1:3000"
+const TOKEN_STORAGE_PATH = "user://token.dat"
 
-func load_from_file():
-	var file = FileAccess.open("user://save_game.dat", FileAccess.READ)
-	var content = file.get_as_text()
-	return content
-
-
-
-
-
-# Sends the JWT token to the Rails API for verification
-func login_with_token(x_token: String, callback: Callable) -> void:
-	#return false
-	#self.x_token = x_token
-	#if verify_token(x_token):
-		#store_token(x_token)
-		#return true
-	#return false
-	verify_token(x_token, callback)
-
-#func _on_login_with_token_completed(_result, _response_code, _headers, _body):
-	#print("_on_login_with_token_completed: ", _response_code)
-	#if _response_code == 200:  # Success response
-		#var json = JSON.new()
-		#var error = json.parse(_body.get_string_from_utf8())
-		#if error == OK:
-			#var tdata = json.data
-			#print("_on_is_authenticated_completed OK: ", tdata)
+# Login with username and password
+func login_with_credentials(email: String, password: String) -> void:
+	print("login_with_credentials", " ", email, " ", password)
+	if auth_state == AuthState.AUTHENTICATING:
+		return
+	auth_state = AuthState.AUTHENTICATING
 	
-# Logs out the user by clearing the stored token
-func logout():
-	x_token = ""
-	store_token("")  # Remove the stored token
+	var url = API_BASE_URL + "/hypership_auth_login"
+	print("login_with_credentials url", " ", url)
 
-# Checks if the user is authenticated by verifying the presence of a valid token
-func is_authenticated(callback: Callable) -> void:
-	#x_token = "TOKENTKNETKNE"
-	#store_token("TOKENTKNETKNE")
-	print("is_authenticated? token:", x_token)
-	if x_token == "":
-		x_token = get_token()
-	if x_token != "":
-		verify_token(x_token, callback)
+	#var headers = ["Content-Type: application/json"]
+	#var body = JSON.stringify({"email": email, "password": password})
+	#_make_request(url, headers, HTTPClient.METHOD_POST, body, _on_login_completed)
+	
+	var headers = ["Content-Type: application/x-www-form-urlencoded"]
+	var body = "email=" + email.uri_encode() + "&password=" + password.uri_encode()
+	_make_request(url, headers, HTTPClient.METHOD_POST, body, _on_login_completed)
+	
+	
+
+# Login with existing token
+func login_with_token(input_token: String) -> void:
+	if auth_state == AuthState.AUTHENTICATING:
+		return
+	auth_state = AuthState.AUTHENTICATING
+	token = input_token
+	verify_token()
+
+# Verify token with backend
+func verify_token() -> void:
+	if token.is_empty() or is_token_expired():
+		auth_state = AuthState.UNAUTHENTICATED
+		token_verified.emit(false, {})
+		return
+		
+	var url = API_BASE_URL + "/verify_token"
+	var headers = get_bearer_headers()
+	_make_request(url, headers, HTTPClient.METHOD_GET, "", _on_verify_completed)
+
+# Check authentication status
+func check_auth_status() -> void:
+	if token.is_empty():
+		token = get_stored_token()
+	verify_token()
+
+# Logout user with API call
+func logout() -> void:
+	if auth_state != AuthState.AUTHENTICATED || token.is_empty():
+		_clear_auth_state()
+		logout_completed.emit(true, {"status": "success", "response": {}})
+		return
+		
+	var url = API_BASE_URL + "/logout"
+	var headers = get_bearer_headers()
+	_make_request(url, headers, HTTPClient.METHOD_POST, "", _on_logout_completed)
+
+# Make authenticated API request
+func make_api_request(endpoint: String, method: int, body: String = "") -> void:
+	if auth_state != AuthState.AUTHENTICATED || is_token_expired():
+		api_request_completed.emit(endpoint, false, {"error": "Not authenticated or token expired"})
+		return
+		
+	var url = API_BASE_URL + endpoint
+	var headers = get_bearer_headers()
+	_make_request(url, headers, method, body, _on_api_request_completed.bind(endpoint))
+
+# Helper methods
+func get_bearer_headers() -> Array:
+	return ["Authorization: Bearer " + token, "Content-Type: application/json"]
+
+func store_token(token_value: String) -> void:
+	var file = FileAccess.open(TOKEN_STORAGE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(token_value)
 	else:
-		x_is_authenticated = false
-		pass
+		printerr("Failed to store token")
 
-func _on_is_authenticated_completed(_result, _response_code, _headers, _body):
-	print("_on_is_authenticated_completed: ", _response_code)
-	if _response_code == 200:  # Success response
-		var json = JSON.new()
-		var error = json.parse(_body.get_string_from_utf8())
-		if error == OK:
-			var tdata = json.data
-			print("_on_is_authenticated_completed OK: ", tdata)
-			#{
-			  #"valid": true,
-			  #"user_id": 1,
-			  #"expires_at": "2024-12-31T23:59:59Z"
-			#}
-			var tvalid = tdata.get("valid", false)
-			if tvalid:
-				x_is_authenticated = true
-	pass
+func get_stored_token() -> String:
+	if !FileAccess.file_exists(TOKEN_STORAGE_PATH):
+		return ""
+	var file = FileAccess.open(TOKEN_STORAGE_PATH, FileAccess.READ)
+	if file:
+		return file.get_as_text()
+	return ""
 
-# Stores the token securely (custom storage method)
-func store_token(token: String):
-	var file = FileAccess.open("user://token.dat", FileAccess.WRITE)
-	file.store_string(token)
-	print('stored! ', token)
+func is_authenticated() -> bool:
+	return auth_state == AuthState.AUTHENTICATED && !is_token_expired()
 
+func is_token_expired() -> bool:
+	if token_expires == 0:
+		return false
+	return Time.get_unix_time_from_system() > token_expires
 
-# Retrieves the stored token from secure storage
-func get_token() -> String:
-	var file_path = "user://token.dat"
-	
-	# Check if the file exists
-	if !FileAccess.file_exists(file_path):
-		# Create the file if it does not exist and write an empty token
-		var file = FileAccess.open(file_path, FileAccess.WRITE)
-		file.store_string("")  # Store an empty string as the initial content
-		file.close()
-	
-	# Open the file for reading
-	var file = FileAccess.open(file_path, FileAccess.READ)
-	var content = file.get_as_text()
-	file.close()
-	
-	return content
+func _clear_auth_state() -> void:
+	token = ""
+	user_data.clear()
+	token_expires = 0
+	store_token("")
+	auth_state = AuthState.UNAUTHENTICATED
 
-
-# Verifies the token with the Rails API
-func verify_token(token: String, callback: Callable) -> void:
-	var url = "http://127.0.0.1:3000/verify_token"  # Rails endpoint for verification
-	var headers = {"Authorization": "Bearer " + token}
+# Internal request handler
+func _make_request(url: String, headers: Array, method: int, body: String, callback: Callable) -> void:
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
-	http_request.connect("request_completed", callback)
-	http_request.request(url)
+	http_request.request_completed.connect(callback)
+	http_request.request_completed.connect(func(_r, _c, _h, _b): http_request.queue_free())
+	var error = http_request.request(url, headers, method, body)
+	if error != OK:
+		printerr("Request failed: ", error)
+		auth_state = AuthState.ERROR
+
+# Response handlers
+func _on_login_completed(_result: int, response_code: int, _headers: Array, body: PackedByteArray) -> void:
+	var success = false
+	var data = {}
+
+	print("_on_login_completed", " ", _result, " ", response_code, " ", body)	
+
+	if response_code == 200:
+		var json = JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			data = json.data
+			if data.get("status") == "success" and data.has("response"):
+				var response = data["response"]
+				if response.has("token"):
+					token = response["token"]
+					user_data["user_id"] = response.get("user_id", "")
+					token_expires = Time.get_unix_time_from_system() + response.get("expires", 0)
+					store_token(token)
+					success = true
+					auth_state = AuthState.AUTHENTICATED
+			if not success:
+				auth_state = AuthState.ERROR
+	else:
+		auth_state = AuthState.UNAUTHENTICATED
 	
+	login_completed.emit(success, data)
+
+func _on_verify_completed(_result: int, response_code: int, _headers: Array, body: PackedByteArray) -> void:
+	var success = false
+	var data = {}
 	
-#func _on_verify_token_completed(result: int, response_code: int, headers: Array, body: PackedByteArray):
-	#print("_on_verify_token_completed ", response_code)
-	#if response_code == 200:
-		#var json = JSON.new()
+	if response_code == 200:
+		var json = JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			data = json.data
+			if data.get("valid", false):
+				success = true
+				auth_state = AuthState.AUTHENTICATED
+				user_data = data.get("user", {})
+			else:
+				auth_state = AuthState.UNAUTHENTICATED
+	else:
+		auth_state = AuthState.UNAUTHENTICATED
+		_clear_auth_state()
+	
+	token_verified.emit(success, data)
+
+func _on_logout_completed(_result: int, response_code: int, _headers: Array, body: PackedByteArray) -> void:
+	var success = false
+	var data = {}
+	
+	if response_code == 200:
+		var json = JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			data = json.data
+			if data.get("status") == "success":
+				success = true
+				_clear_auth_state()
+	else:
+		data = {"error": "Logout failed", "code": response_code}
+	
+	logout_completed.emit(success, data)
+
+func _on_api_request_completed(endpoint: String, _result: int, response_code: int, _headers: Array, body: PackedByteArray) -> void:
+	var success = response_code == 200
+	var data = {}
+	
+	if success:
+		var json = JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			data = json.data
+		else:
+			success = false
+			data = {"error": "Invalid JSON response"}
+	else:
+		data = {"error": "Request failed", "code": response_code}
+	
+	api_request_completed.emit(endpoint, success, data)

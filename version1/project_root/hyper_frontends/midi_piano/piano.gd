@@ -27,28 +27,49 @@ var state_check_timer: Timer
 
 @onready var hypership = $HyperShip
 
+
+
 func _ready():
+
+
+	# auth
+	
+	# Example UI button connections (assuming you have these buttons in your scene)
+	#$HBoxContainer/Login.pressed.connect(_on_login_button_pressed)
+	#$LogoutButton.pressed.connect(_on_logout_button_pressed)
+	#$TestApiButton.pressed.connect(_on_test_api_button_pressed)
+	
+	hypership.auth_manager.connect("login_completed", _on_login_completed)
+
+
+
+
+
 	# Create state check timer
 	state_check_timer = Timer.new()
 	state_check_timer.wait_time = 1.0  # Check every second
 	state_check_timer.timeout.connect(_check_websocket_state)
 	add_child(state_check_timer)
-	state_check_timer.start()
+	#state_check_timer.start()
+	#!!! XXX 
 	
 	# Get reference to WebSocket manager
 	websocket_manager = hypership.websocket_manager
+	connection_status.text = "Disconnected"
 
-	websocket_manager.setup("ws://127.0.0.1:6001")
-	websocket_manager.is_enabled = true
-	websocket_manager.connect("connected", _on_websocket_connected)
-	websocket_manager.connect("disconnected", _on_websocket_disconnected)
-	websocket_manager.connect("data_received", _on_websocket_data_received)
-	websocket_manager.connect("connection_error", _on_websocket_connection_error)
-	websocket_manager.connect("connection_state_changed", _on_websocket_connection_state_changed)
-	websocket_manager.connect_to_server()
 
-	connection_status.text = "Connecting..."
-	connection_status.modulate = Color(1, 1, 0)  # Yellow
+	#WEBSOCKET !!
+	#websocket_manager.setup("ws://127.0.0.1:6001")
+	#websocket_manager.is_enabled = true
+	#websocket_manager.connect("connected", _on_websocket_connected)
+	#websocket_manager.connect("disconnected", _on_websocket_disconnected)
+	#websocket_manager.connect("data_received", _on_websocket_data_received)
+	#websocket_manager.connect("connection_error", _on_websocket_connection_error)
+	#websocket_manager.connect("connection_state_changed", _on_websocket_connection_state_changed)
+	#websocket_manager.connect_to_server()
+#
+	#connection_status.text = "Connecting..."
+	#connection_status.modulate = Color(1, 1, 0)  # Yellow
 
 	# Sanity checks.
 	if _is_note_index_sharp(_pitch_index_to_note_index(START_KEY)):
@@ -289,3 +310,17 @@ func _print_midi_info(midi_event: InputEventMIDI):
 	print("Pressure: " + str(midi_event.pressure))
 	print("Controller number: " + str(midi_event.controller_number))
 	print("Controller value: " + str(midi_event.controller_value))
+
+
+func _on_login_button_pressed() -> void:
+	hypership.auth_manager.login_with_credentials("hypershipuser1@test.com", "111")
+	pass # Replace with function body.
+
+func _on_login_completed(success, data):
+	print("success", success)
+	print("data", data)
+	if success:
+		print("Logged in! Token: ", hypership.auth_manager.token)
+	else:
+		print("Login failed")
+	pass
